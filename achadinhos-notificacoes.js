@@ -46,7 +46,7 @@
   var TXT = 'Ative as notifica\u00e7\u00f5es e receba no celular as promo\u00e7\u00f5es novas do Achadinhos assim que elas entrarem no site.';
   var sino = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
   var css = ':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}' +
-    '.bar{position:fixed;z-index:2147483646;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:16px 48px 16px 18px;border-radius:18px;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;box-shadow:0 10px 34px rgba(0,0,0,.35);animation:down .45s ease-out}' +
+    '.bar,.card{cursor:pointer}.bar{position:fixed;z-index:2147483646;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:16px 48px 16px 18px;border-radius:18px;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;box-shadow:0 10px 34px rgba(0,0,0,.35);animation:down .45s ease-out}' +
     '.ico{flex:none;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center}.ico svg{width:26px;height:26px;animation:ring 2.4s ease-in-out infinite;transform-origin:50% 10%}' +
     '.txt{flex:1;min-width:0}.t{margin:0 0 3px;font-size:18px;font-weight:800;line-height:1.2}.m{margin:0;font-size:14px;line-height:1.4;opacity:.95}' +
     '.btn{flex:none;display:inline-block;border:0;border-radius:999px;background:#fff;color:#d94f00;font-weight:800;font-size:15px;padding:13px 22px;text-decoration:none;text-align:center;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.12);animation:pulse 1.8s ease-in-out infinite}.btn:hover{background:#fff1e6}.btn[disabled]{opacity:.75;cursor:default;animation:none}' +
@@ -155,10 +155,15 @@
       } else if (e.message !== 'fechou') aviso('N\u00e3o deu para ativar agora. Tente de novo em instantes.');
     });
   }
+  // O banner inteiro e o botao: tocar em qualquer lugar dele (menos no X e no "Agora nao") ativa.
   function liga(box) {
     var x = box.querySelector('.btn');
-    if (push) x.addEventListener('click', ativar);
-    else x.addEventListener('click', function () { ls.set('ativou'); fim = true; if (root) root.remove(); });
+    box.addEventListener('click', function (e) {
+      if (e.target.closest('.x,.no') || box.classList.contains('ok')) return;
+      if (push) return ativar();
+      if (!e.target.closest('a.btn')) window.open(link, '_blank', 'noopener');
+      ls.set('ativou'); fim = true; if (root) root.remove();
+    });
   }
 
   function barra() {
