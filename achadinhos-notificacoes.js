@@ -6,7 +6,7 @@
  * Onde o navegador nao aceita push (iPhone fora da Tela de Inicio, navegador de app), o botao abre
  * www.achadinhos.tv.br/notificacoes.
  * Tocar em qualquer lugar do banner ativa (com a janela aberta, em qualquer lugar da tela); so o X fecha.
- * Aparece so uma janela no meio da tela, 3 s depois de abrir o site; fechada no X, volta na proxima visita.
+ * Aparece so uma janela no meio da tela, 100 s depois de a pessoa chegar ao site; fechada no X, volta na proxima visita.
  * Nao aparece para quem ja ativou nem em paginas de admin/login (no Getfindsy e no EmbroidHub, so em navegador em portugues).
  */
 (function () {
@@ -193,9 +193,13 @@
   }
 
   // So a janela do meio (Rick tirou a barra do topo dos outros sites; ela fica so no Achadinhos).
-  // Aparece 3 s depois de abrir o site; fechada no X, volta na proxima visita (nova aba).
+  // Aparece 100 s depois de a pessoa chegar ao site (conta o tempo somado entre as paginas da mesma visita);
+  // fechada no X, volta na proxima visita (nova aba).
+  var ESPERA = 100000;
   function mostrar() {
-    setTimeout(function () { if (!ativando && !fim && !ss.get('janela-fechada')) janela(); }, 3000);
+    var inicio = Date.now();
+    try { inicio = Number(sessionStorage.getItem('achPush:inicio')) || inicio; sessionStorage.setItem('achPush:inicio', String(inicio)); } catch (e) {}
+    setTimeout(function () { if (!ativando && !fim && !ss.get('janela-fechada')) janela(); }, Math.max(0, ESPERA - (Date.now() - inicio)));
   }
   function start() {
     if (!push || Notification.permission !== 'granted') return mostrar();
