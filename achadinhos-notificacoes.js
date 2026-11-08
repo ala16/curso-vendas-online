@@ -6,7 +6,7 @@
  * Onde o navegador nao aceita push (iPhone fora da Tela de Inicio, navegador de app), o botao abre
  * www.achadinhos.tv.br/notificacoes.
  * Aparece uma barra fixa no topo (volta a cada visita) e, 3 s depois, uma janela no meio da tela (a cada 12 h).
- * Nao aparece para quem ja ativou, em paginas de admin/login nem para quem nao usa o navegador em portugues.
+ * Nao aparece para quem ja ativou nem em paginas de admin/login (no Getfindsy e no EmbroidHub, so em navegador em portugues).
  */
 (function () {
   if (window.__achPush) return;
@@ -17,7 +17,8 @@
   if (/(^|\.)achadinhos\.tv\.br$/.test(host)) return;
   if (/^\/(admin|painel|login|entrar|dashboard)(\/|$)/i.test(location.pathname)) return;
   var langs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'pt-BR']).join(',');
-  if (!/(^|,)pt/i.test(langs)) return;
+  // Nos sites em ingles (Getfindsy, EmbroidHub) so aparece para quem usa o navegador em portugues; nos outros, para todos.
+  if (/getfindsy|embroidhub/i.test(host) && !/(^|,)pt/i.test(langs)) return;
 
   // O service worker fica na mesma pasta deste arquivo (funciona tambem em site publicado numa subpasta).
   var me = document.currentScript && document.currentScript.src;
