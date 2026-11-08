@@ -5,6 +5,7 @@
  * Achadinhos, que avisa de cada promocao nova com a mesma chave VAPID. O toque no aviso abre a oferta no Achadinhos.
  * Onde o navegador nao aceita push (iPhone fora da Tela de Inicio, navegador de app), o botao abre
  * www.achadinhos.tv.br/notificacoes.
+ * Tocar em qualquer lugar do banner ativa (com a janela aberta, em qualquer lugar da tela); so o X fecha.
  * Aparece uma barra fixa no topo (volta a cada visita) e, 3 s depois, uma janela no meio da tela (a cada 12 h).
  * Nao aparece para quem ja ativou nem em paginas de admin/login (no Getfindsy e no EmbroidHub, so em navegador em portugues).
  */
@@ -46,7 +47,7 @@
   var TXT = 'Ative as notifica\u00e7\u00f5es e receba no celular as promo\u00e7\u00f5es novas do Achadinhos assim que elas entrarem no site.';
   var sino = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
   var css = ':host{all:initial}*{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}' +
-    '.bar,.card{cursor:pointer}.bar{position:fixed;z-index:2147483646;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:16px 48px 16px 18px;border-radius:18px;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;box-shadow:0 10px 34px rgba(0,0,0,.35);animation:down .45s ease-out}' +
+    '.bar,.ov,.card{cursor:pointer}.bar{position:fixed;z-index:2147483646;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:16px 48px 16px 18px;border-radius:18px;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;box-shadow:0 10px 34px rgba(0,0,0,.35);animation:down .45s ease-out}' +
     '.ico{flex:none;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center}.ico svg{width:26px;height:26px;animation:ring 2.4s ease-in-out infinite;transform-origin:50% 10%}' +
     '.txt{flex:1;min-width:0}.t{margin:0 0 3px;font-size:18px;font-weight:800;line-height:1.2}.m{margin:0;font-size:14px;line-height:1.4;opacity:.95}' +
     '.btn{flex:none;display:inline-block;border:0;border-radius:999px;background:#fff;color:#d94f00;font-weight:800;font-size:15px;padding:13px 22px;text-decoration:none;text-align:center;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.12);animation:pulse 1.8s ease-in-out infinite}.btn:hover{background:#fff1e6}.btn[disabled]{opacity:.75;cursor:default;animation:none}' +
@@ -155,11 +156,12 @@
       } else if (e.message !== 'fechou') aviso('N\u00e3o deu para ativar agora. Tente de novo em instantes.');
     });
   }
-  // O banner inteiro e o botao: tocar em qualquer lugar dele (menos no X e no "Agora nao") ativa.
-  function liga(box) {
-    var x = box.querySelector('.btn');
-    box.addEventListener('click', function (e) {
-      if (e.target.closest('.x,.no') || box.classList.contains('ok')) return;
+  // O banner inteiro e o botao: tocar em qualquer lugar dele (menos no X) ativa; com a janela aberta, a tela inteira.
+  // area: onde o toque conta (a barra, ou a tela inteira quando a janela esta aberta); box: o que fica verde no fim.
+  function liga(area, box) {
+    box = box || area;
+    area.addEventListener('click', function (e) {
+      if (e.target.closest('.x') || box.classList.contains('ok')) return;
       if (push) return ativar();
       if (!e.target.closest('a.btn')) window.open(link, '_blank', 'noopener');
       ls.set('ativou'); fim = true; if (root) root.remove();
@@ -179,14 +181,13 @@
   function janela() {
     mount();
     ls.set('janela');
-    var o = el('<div class="ov" role="dialog" aria-modal="true" aria-labelledby="ach-t"><div class="card"><button class="x" type="button" aria-label="Fechar">\u00d7</button><div class="top"><div class="ico">' + sino + '</div><p class="t" id="ach-t">N\u00e3o perca nenhum achadinho!</p></div><div class="body"><p class="m">Ative as notifica\u00e7\u00f5es do Achadinhos e receba no celular as promo\u00e7\u00f5es e cupons da Amazon e do Mercado Livre assim que entrarem no site. \u00c9 gr\u00e1tis e sem cadastro.</p>' + botao('\ud83d\udd14 Ativar notifica\u00e7\u00f5es') + '<button class="no" type="button">Agora n\u00e3o</button></div></div></div>');
+    var o = el('<div class="ov" role="dialog" aria-modal="true" aria-labelledby="ach-t"><div class="card"><button class="x" type="button" aria-label="Fechar">\u00d7</button><div class="top"><div class="ico">' + sino + '</div><p class="t" id="ach-t">N\u00e3o perca nenhum achadinho!</p></div><div class="body"><p class="m">Ative as notifica\u00e7\u00f5es do Achadinhos e receba no celular as promo\u00e7\u00f5es e cupons da Amazon e do Mercado Livre assim que entrarem no site. \u00c9 gr\u00e1tis e sem cadastro.</p>' + botao('\ud83d\udd14 Ativar notifica\u00e7\u00f5es') + '</div></div></div>');
     var card = o.querySelector('.card');
     var fechar = function () { o.remove(); boxes = boxes.filter(function (b) { return b !== card; }); document.removeEventListener('keydown', esc); };
     var esc = function (e) { if (e.key === 'Escape') fechar(); };
-    liga(card);
+    // Com a janela aberta, tocar em qualquer lugar da tela (ate no fundo escuro) ativa. So o X fecha.
+    liga(o, card);
     o.querySelector('.x').addEventListener('click', fechar);
-    o.querySelector('.no').addEventListener('click', fechar);
-    o.addEventListener('click', function (e) { if (e.target === o) fechar(); });
     document.addEventListener('keydown', esc);
     boxes.push(card);
     shadow.appendChild(o);
