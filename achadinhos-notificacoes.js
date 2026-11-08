@@ -6,7 +6,7 @@
  * Onde o navegador nao aceita push (iPhone fora da Tela de Inicio, navegador de app), o botao abre
  * www.achadinhos.tv.br/notificacoes.
  * Tocar em qualquer lugar do banner ativa (com a janela aberta, em qualquer lugar da tela); so o X fecha.
- * Aparece uma barra fixa no topo (volta a cada visita) e, 3 s depois, uma janela no meio da tela (a cada 12 h).
+ * Aparece so uma janela no meio da tela, 3 s depois de abrir o site; fechada no X, volta na proxima visita.
  * Nao aparece para quem ja ativou nem em paginas de admin/login (no Getfindsy e no EmbroidHub, so em navegador em portugues).
  */
 (function () {
@@ -180,10 +180,9 @@
 
   function janela() {
     mount();
-    ls.set('janela');
     var o = el('<div class="ov" role="dialog" aria-modal="true" aria-labelledby="ach-t"><div class="card"><button class="x" type="button" aria-label="Fechar">\u00d7</button><div class="top"><div class="ico">' + sino + '</div><p class="t" id="ach-t">N\u00e3o perca nenhum achadinho!</p></div><div class="body"><p class="m">Ative as notifica\u00e7\u00f5es do Achadinhos e receba no celular as promo\u00e7\u00f5es e cupons da Amazon e do Mercado Livre assim que entrarem no site. \u00c9 gr\u00e1tis e sem cadastro.</p>' + botao('\ud83d\udd14 Ativar notifica\u00e7\u00f5es') + '</div></div></div>');
     var card = o.querySelector('.card');
-    var fechar = function () { o.remove(); boxes = boxes.filter(function (b) { return b !== card; }); document.removeEventListener('keydown', esc); };
+    var fechar = function () { ss.set('janela-fechada'); o.remove(); boxes = boxes.filter(function (b) { return b !== card; }); document.removeEventListener('keydown', esc); };
     var esc = function (e) { if (e.key === 'Escape') fechar(); };
     // Com a janela aberta, tocar em qualquer lugar da tela (ate no fundo escuro) ativa. So o X fecha.
     liga(o, card);
@@ -193,10 +192,10 @@
     shadow.appendChild(o);
   }
 
+  // So a janela do meio (Rick tirou a barra do topo dos outros sites; ela fica so no Achadinhos).
+  // Aparece 3 s depois de abrir o site; fechada no X, volta na proxima visita (nova aba).
   function mostrar() {
-    barra();
-    // A janela aparece de novo a cada 12 horas.
-    setTimeout(function () { if (!ativando && !fim && Date.now() - ls.get('janela') > DIA / 2) janela(); }, 3000);
+    setTimeout(function () { if (!ativando && !fim && !ss.get('janela-fechada')) janela(); }, 3000);
   }
   function start() {
     if (!push || Notification.permission !== 'granted') return mostrar();
